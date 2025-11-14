@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+message CityRequest {
+    string city = 1;
+}
+
+message CityWeatherDataResponse {
+    string city_name = 1;
+    int32 temperature = 2;
+    string weather_description = 3;
+    int32 humidity = 4;
+    string wind_speed = 5;
+}
+
+service WeatherData {
+    rpc Weather (CityRequest) returns (CityWeatherDataResponse); 
+}
