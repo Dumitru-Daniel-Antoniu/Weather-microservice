@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rweather.proto\"\x1b\n\x0b\x43ityRequest\x12\x0c\n\x04\x63ity\x18\x01 \x01(\t\"\x84\x01\n\x17\x43ityWeatherDataResponse\x12\x11\n\tcity_name\x18\x01 \x01(\t\x12\x13\n\x0btemperature\x18\x02 \x01(\x05\x12\x1b\n\x13weather_description\x18\x03 \x01(\t\x12\x10\n\x08humidity\x18\x04 \x01(\x05\x12\x12\n\nwind_speed\x18\x05 \x01(\t2@\n\x0bWeatherData\x12\x31\n\x07Weather\x12\x0c.CityRequest\x1a\x18.CityWeatherDataResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rweather.proto\"\x1b\n\x0b\x43ityRequest\x12\x0c\n\x04\x63ity\x18\x01 \x01(\t\"\x84\x01\n\x17\x43ityWeatherDataResponse\x12\x11\n\tcity_name\x18\x01 \x01(\t\x12\x13\n\x0btemperature\x18\x02 \x01(\x02\x12\x1b\n\x13weather_description\x18\x03 \x01(\t\x12\x10\n\x08humidity\x18\x04 \x01(\x05\x12\x12\n\nwind_speed\x18\x05 \x01(\x02\x32@\n\x0bWeatherData\x12\x31\n\x07Weather\x12\x0c.CityRequest\x1a\x18.CityWeatherDataResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
