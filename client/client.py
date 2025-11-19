@@ -1,7 +1,7 @@
 import grpc
 
-from server.weather_pb2 import CityRequest
-from server.weather_pb2_grpc import WeatherDataStub
+from weather_pb2 import CityRequest
+from weather_pb2_grpc import WeatherDataStub
 
 
 def main():
