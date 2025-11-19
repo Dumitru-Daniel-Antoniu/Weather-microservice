@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+    container_name: weather_app
+    ports:
+      - "50051:50051"
+    networks:
+      - weather_network
+    depends_on:
+      - mongodb
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+  
+  mongodb:
+    image: mongo:latest
+    container_name: weather_mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - weather_network
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+    command: ["mongod", "--auth"]
+
+networks:
+  weather_network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

@@ -1,11 +1,15 @@
 certifi==2025.11.12
 charset-normalizer==3.4.4
+dnspython==2.8.0
 grpcio==1.76.0
 grpcio-tools==1.76.0
 idna==3.11
 protobuf==6.33.0
+pymongo==4.15.4
 python-dotenv==1.2.1
 requests==2.32.5
 setuptools==80.9.0
 typing_extensions==4.15.0
+tzdata==2025.2
+tzlocal==5.3.1
 urllib3==2.5.0
