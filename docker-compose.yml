@@ -1,10 +1,11 @@
 version: "3.9"
 
 services:
-  app:
+  backend:
     build:
       context: .
-    container_name: weather_app
+      dockerfile: backend/Dockerfile
+    container_name: weather_backend
     ports:
       - "50051:50051"
     networks:
@@ -14,7 +15,30 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-  
+
+  proxy:
+    build:
+      context: .
+      dockerfile: proxy/Dockerfile
+    container_name: weather_proxy
+    ports:
+      - "8000:8000"
+    networks:
+      - weather_network
+    depends_on:
+      - backend
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: weather_frontend
+    ports:
+      - "3000:80"
+    networks:
+      - weather_network
+    depends_on:
+      - proxy
+
   mongodb:
     image: mongo:latest
     container_name: weather_mongodb

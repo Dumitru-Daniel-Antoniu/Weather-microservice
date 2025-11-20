@@ -6,13 +6,17 @@ from concurrent import futures
 
 from core.config import GRPC_API_KEY, COLLECTION_NAME, DATABASE_NAME, WEATHER_API_KEY, WEATHER_API_URL
 
-from db.session import insert_weather_data
+from db.session import get_weather_history, insert_weather_data
+
+from security.access import APIKeyInterceptor
 
 from security.access import APIKeyInterceptor
 
 from weather_pb2_grpc import WeatherDataServicer, add_WeatherDataServicer_to_server
-from weather_pb2 import CityWeatherDataResponse
+from weather_pb2 import CityWeatherDataResponse, HistoryEntry, HistoryResponse
 
+import logging
+logging.basicConfig(level=logging.INFO)
 
 class WeatherDataService(
     WeatherDataServicer
@@ -77,6 +81,40 @@ class WeatherDataService(
             context.set_code(grpc.StatusCode.UNKNOWN)
 
         return CityWeatherDataResponse()
+
+
+    async def WeatherHistory(self, request, context):
+        try:
+            city = request.city
+            start_date = request.start_date
+            end_date = request.end_date
+            logging.info(f"Received WeatherHistory request for city: {city}, start_date: {start_date}, end_date: {end_date}")
+
+            if not city or not start_date or not end_date:
+                logging.info("Missing required parameters in WeatherHistory request.")
+                return HistoryResponse(entries=[], error="Missing required parameters.")
+
+            results = await get_weather_history(DATABASE_NAME, COLLECTION_NAME, city, start_date, end_date)
+            if not results:
+                logging.info("No data found for the specified city and date range.")
+                return HistoryResponse(entries=[], error="No data found for this city and period.")
+
+            entries = [
+                HistoryEntry(
+                    date=entry["date"],
+                    temperature=entry["temperature"],
+                    humidity=entry["humidity"],
+                    wind_speed=entry["wind_speed"]
+                )
+                for entry in results
+            ]
+            logging.info(f"Returning {len(entries)} history entries.")
+
+            return HistoryResponse(entries=entries, error="")
+
+        except Exception as e:
+            logging.error(f"Error in WeatherHistory: {str(e)}")
+            return HistoryResponse(entries=[], error=f"An unexpected error occurred: {str(e)}")
 
 
 async def serve():
