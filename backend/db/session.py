@@ -1,3 +1,5 @@
+import logging
+
 from core.config import MONGODB_HOST, MONGODB_PASSWORD, MONGODB_PORT, MONGODB_USERNAME
 
 from datetime import datetime
@@ -8,8 +10,13 @@ from pymongo import errors
 
 from tzlocal import get_localzone
 
+logging.basicConfig(level=logging.INFO)
 
+
+logging.info("Connecting to MongoDB...")
+logging.info(f"Host: {MONGODB_HOST}, Port: {MONGODB_PORT}, Username: {MONGODB_USERNAME}")
 MONGO_URI = f"mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_HOST}:{MONGODB_PORT}"
+logging.info(f"MongoDB URI: {MONGO_URI}")
 client = AsyncIOMotorClient(MONGO_URI)
 
 
@@ -46,3 +53,36 @@ async def insert_weather_data(
 
     except Exception as e:
         raise RuntimeError(f"An unexpected error occurred: {str(e)}") from e
+
+
+async def get_weather_history(
+    database_name: str,
+    collection_name: str,
+    city: str,
+    start_date: str,
+    end_date: str
+):
+    """Fetch weather history for a city in a date range."""
+    db = client[database_name]
+    collection = db[collection_name]
+
+    try:
+        query = {
+            "city": city,
+            "date": {"$gte": start_date, "$lte": end_date}
+        }
+
+        cursor = collection.find(query)
+        results = []
+
+        async for document in cursor:
+            results.append({
+                "date": document["date"],
+                "temperature": document["temperature"],
+                "humidity": document["humidity"],
+                "wind_speed": document["wind_speed"]
+            })
+        return results
+
+    except Exception as e:
+        raise RuntimeError(f"Failed to fetch weather history: {str(e)}")
