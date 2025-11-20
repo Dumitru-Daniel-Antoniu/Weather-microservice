@@ -2,16 +2,18 @@ from core.config import MONGODB_HOST, MONGODB_PASSWORD, MONGODB_PORT, MONGODB_US
 
 from datetime import datetime
 
-from tzlocal import get_localzone
+from motor.motor_asyncio import AsyncIOMotorClient
 
-from pymongo import MongoClient, errors
+from pymongo import errors
+
+from tzlocal import get_localzone
 
 
 MONGO_URI = f"mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_HOST}:{MONGODB_PORT}"
-client = MongoClient(MONGO_URI)
+client = AsyncIOMotorClient(MONGO_URI)
 
 
-def insert_weather_data(
+async def insert_weather_data(
     database_name: str,
     collection_name: str,
     city: str,
@@ -34,7 +36,7 @@ def insert_weather_data(
             "wind_speed": weather_info["wind_speed"]
         }
 
-        collection.insert_one(document)
+        await collection.insert_one(document)
 
     except errors.ServerSelectionTimeoutError as e:
         raise RuntimeError("Failed to connect to MongoDB") from e
