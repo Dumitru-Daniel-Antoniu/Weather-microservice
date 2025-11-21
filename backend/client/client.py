@@ -1,7 +1,7 @@
 import asyncio
 import grpc
 
-from core.config import GRPC_API_KEY
+from core.config import GRPC_API_KEY, GRPC_CLIENT_HOST, GRPC_PORT
 
 from weather_pb2 import CityRequest
 from weather_pb2_grpc import WeatherDataStub
@@ -10,7 +10,7 @@ from weather_pb2_grpc import WeatherDataStub
 async def main():
     city = input("Enter city name: ")
 
-    async with grpc.aio.insecure_channel("localhost:50051") as channel:
+    async with grpc.aio.insecure_channel(f"{GRPC_CLIENT_HOST}:{GRPC_PORT}") as channel:
         client = WeatherDataStub(channel)
         request = CityRequest(city=city)
 

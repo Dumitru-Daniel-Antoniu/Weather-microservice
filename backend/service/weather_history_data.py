@@ -9,6 +9,7 @@ async def get_weather_history(
     end_date: str
 ):
     """Fetches weather history for a city within a date range."""
+
     try:
         if not city:
             raise ValueError("City name must be provided.")
