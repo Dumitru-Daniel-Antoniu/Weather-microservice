@@ -6,9 +6,11 @@ A client-server weather application that fetches current weather from a public A
 - The server calls the external Weather API, processes the response, stores a document in MongoDB and returns the current weather.
 - The frontend (React) calls an HTTP proxy -> backend to get current weather or historical data, then renders 3 charts (temperature, humidity, wind).
 
+
 Why this project
 - Demonstrates gRPC server/client, a microservice-style HTTP proxy, MongoDB persistence, and a React frontend for visualization.
 - Simple, testable components with a clear separation of responsibilities.
+
 
 Core flow
 1. Client CLI (gRPC client) submits CityRequest to the gRPC server.
@@ -17,6 +19,7 @@ Core flow
 4. Frontend requests current or historical data via HTTP endpoints exposed by the proxy; the proxy forwards to backend gRPC endpoints and returns JSON for the UI.
 5. History requests return documents in the requested time window and the frontend renders charts.
 
+
 Technologies
 - Python 3.13.9
 - gRPC (protobufs) — service and messages defined in protobufs/weather.proto
@@ -24,6 +27,7 @@ Technologies
 - httpx for external HTTP requests
 - React for the frontend
 - Docker (Dockerfile) for container builds
+
 
 Project layout (important parts)
 - protobufs/weather.proto — gRPC definitions (CityRequest, CityWeatherDataResponse, HistoryRequest, HistoryResponse, HistoryEntry)
@@ -40,11 +44,13 @@ Project layout (important parts)
 - frontend/ — React UI that calls proxy endpoints
 - core/config.py — configuration of environment variables
 
+
 gRPC (proto) summary
 - weather.proto defines:
   - RPC Weather(CityRequest) -> CityWeatherDataResponse
   - RPC WeatherHistory(HistoryRequest) -> HistoryResponse
 - The server implements Weather and WeatherHistory; the protobuf files are compiled with grpc_tools.protoc to generate the Python stubs.
+
 
 HTTP proxy routes (used by the frontend)
 - GET /api/weather?city=<city>
@@ -53,6 +59,7 @@ HTTP proxy routes (used by the frontend)
 - GET /api/history?city=<city>&start_date=<YYYY-MM-DD HH:MM:SS>&end_date=<YYYY-MM-DD HH:MM:SS>
   - Returns history JSON:
     { entries: [ { date, temperature, humidity, wind_speed }, ... ], error: "" }
+
 
 Quick start
 1. Clone the repository
