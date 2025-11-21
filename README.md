@@ -2,9 +2,9 @@
 
 ---
 
-A client-server weather application that fetches current weather from a public API, serves it over gRPC, stores results in MongoDB, and provides a frontend to visualize current and historical data.
+A client-server weather application that fetches current weather from a public API, serves it over gRPC, stores results in MongoDB and provides a frontend to visualize current and historical data.
 
-- The client is a simple CLI that asks for a city and calls the gRPC server.
+- The client is a CLI that asks for a city and calls the gRPC server.
 - The server calls the external Weather API, processes the response, stores a document in MongoDB and returns the current weather.
 - The frontend (React) calls an HTTP proxy -> backend to get current weather or historical data, then renders 3 charts (temperature, humidity, wind).
 
@@ -38,7 +38,7 @@ A client-server weather application that fetches current weather from a public A
 
 ---
 
-## Project layout (important parts)
+## Project layout
 
 - protobufs/weather.proto — gRPC definitions (CityRequest, CityWeatherDataResponse, HistoryRequest, HistoryResponse, HistoryEntry)  
 - backend/ — gRPC server, services, repository and business logic
