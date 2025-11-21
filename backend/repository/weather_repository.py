@@ -9,6 +9,7 @@ async def insert_weather(
     document: dict
 ):
     """Inserts weather data into the specified MongoDB collection."""
+
     try:
         db = client[database_name]
         collection = db[collection_name]
@@ -32,6 +33,7 @@ async def get_history(
     end_date: str
 ):
     """Fetch weather history for a city in a date range."""
+
     try:
         db = client[database_name]
         collection = db[collection_name]

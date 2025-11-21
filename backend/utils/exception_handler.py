@@ -3,6 +3,8 @@ import httpx
 
 
 def handle_weather_exception(context, e, request_city=None):
+    """Maps exceptions to gRPC status codes and messages."""
+
     if isinstance(e, httpx.HTTPStatusError):
         status = e.response.status_code
         if status == 401:

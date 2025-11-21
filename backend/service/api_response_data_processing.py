@@ -2,6 +2,7 @@
 
 async def process_api_response(city: str, response_json: dict) -> dict:
     """Processes the API response and extracts relevant weather data."""
+
     try:
         if not city:
             raise ValueError("City name must be provided.")

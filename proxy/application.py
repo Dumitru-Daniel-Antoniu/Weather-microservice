@@ -2,7 +2,7 @@ import grpc
 import weather_pb2
 import weather_pb2_grpc
 
-from core.config import GRPC_API_KEY
+from core.config import BACKEND_CONTAINER, GRPC_API_KEY, GRPC_PORT
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,7 +19,7 @@ app.add_middleware(
 
 @app.get("/api/weather")
 async def get_weather(city: str):
-    async with grpc.aio.insecure_channel('weather_backend:50051') as channel:
+    async with grpc.aio.insecure_channel(f"{BACKEND_CONTAINER}:{GRPC_PORT}") as channel:
         stub = weather_pb2_grpc.WeatherDataStub(channel)
         request = weather_pb2.CityRequest(city=city)
 
@@ -42,7 +42,7 @@ async def get_weather(city: str):
 
 @app.get("/api/history")
 async def get_history(city: str, start_date: str, end_date: str):
-    async with grpc.aio.insecure_channel('weather_backend:50051') as channel:
+    async with grpc.aio.insecure_channel(f"{BACKEND_CONTAINER}:{GRPC_PORT}") as channel:
         stub = weather_pb2_grpc.WeatherDataStub(channel)
         request = weather_pb2.HistoryRequest(
             city=city,

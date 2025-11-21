@@ -3,6 +3,10 @@ FROM python:3.11
 WORKDIR /app
 
 COPY proxy/ /app
+
+RUN rm -rf /app/tests
+
+COPY proxy/tests/. /app
 COPY protobufs/ /app/protobufs
 COPY core/ /app/core/
 COPY .env /app/.env

@@ -12,6 +12,7 @@ async def add_weather(
     weather_info: dict
 ):
     """Adds current weather data to the database."""
+
     try:
         if not city:
             raise ValueError("City name must be provided.")
