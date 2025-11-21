@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import CurrentWeatherDashboard from "./components/CurrentWeatherDashboard";
+import HistoryDashboard from "./components/HistoryDashboard";
 
 const PERIODS = [
   { key: "1h", label: "Last hour" },
@@ -8,32 +9,7 @@ const PERIODS = [
   { key: "48h", label: "Last 48 hours" },
   { key: "72h", label: "Last 72 hours" },
   { key: "5d", label: "Last 5 days" }
-]
-
-function MetricChart({ data, dataKey, color, title, unit }) {
-  return (
-    <div style={{ background: "#f3f4f6", borderRadius: 12, padding: 16, marginBottom: 16 }}>
-      <h3 style={{ margin: 0, marginBottom: 8 }}>{title}</h3>
-      <div style={{ width: "100%", minWidth: 900, height: 220 }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data}>
-          <defs>
-            <linearGradient id={`color-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.7} />
-              <stop offset="100%" stopColor={color} stopOpacity={0.2} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
-          <XAxis dataKey="time" />
-          <YAxis />
-          <Tooltip formatter={(value) => `${value} ${unit}`} />
-          <Area type="monotone" dataKey={dataKey} stroke={color} fill={`url(#color-${dataKey})`} />
-        </AreaChart>
-      </ResponsiveContainer>
-      </div>
-    </div>
-  );
-}
+];
 
 function getPeriodRange(periodKey) {
   const now = new Date();
@@ -65,6 +41,7 @@ function App() {
     };
   }, []);
 
+  const [timeToDateMap, setTimeToDateMap] = useState({});
   const [city, setCity] = useState("");
   const [temperatureData, setTemperatureData] = useState([]);
   const [humidityData, setHumidityData] = useState([]);
@@ -82,6 +59,10 @@ function App() {
     setShowCharts(false);
     const [start_date, end_date] = getPeriodRange(period);
     try {
+      if (!city) {
+        setError("Please enter a city.");
+        return;
+      }
       const response = await fetch(
         `http://localhost:8000/api/history?city=${encodeURIComponent(city)}&start_date=${encodeURIComponent(start_date)}&end_date=${encodeURIComponent(end_date)}`
       );
@@ -101,18 +82,26 @@ function App() {
       } else {
         setTemperatureData(response_json.entries.map(e => ({
           time: e.date.slice(11, 16),
-          temperature: e.temperature
+          temperature: e.temperature,
+          date: e.date
         })));
         setHumidityData(response_json.entries.map(e => ({
           time: e.date.slice(11, 16),
-          humidity: e.humidity
+          humidity: e.humidity,
+          date: e.date
         })));
         setWindData(response_json.entries.map(e => ({
           time: e.date.slice(11, 16),
-          wind: e.wind_speed
+          wind: e.wind_speed,
+          date: e.date
         })));
         setShowCharts(true);
       }
+      const timeToDateMap = {};
+      response_json.entries.forEach(e => {
+        timeToDateMap[e.date.slice(11, 16)] = e.date.slice(0, 10); //
+      });
+      setTimeToDateMap(timeToDateMap);
     }
     catch (err) {
       setError("Failed to fetch data from server.");
@@ -155,78 +144,23 @@ function App() {
       >
         SkyScope Weather Viewer
       </h1>
-      <div style={{ maxWidth: 1100, margin: "40px auto", padding: 32, background: "#fff", borderRadius: 20, boxShadow: "0 2px 16px #0001", marginBottom: 0 }}>
-        <div style={{ display: "flex", gap: 12, marginBottom: 32, justifyContent: "center" }}>
-          <input
-            value={city}
-            onChange={e => setCity(e.target.value)}
-            placeholder="Enter city"
-            style={{ width: 220, flex: "none", padding: 10, borderRadius: 8, border: "1px solid #ccc", fontSize: 18 }}
-          />
-          <div style={{ position: "relative" }}>
-            <button
-              onClick={() => setShowDropdown((v) => !v)}
-              style={{
-                padding: "10px 18px",
-                borderRadius: 8,
-                background: "#f3f4f6",
-                border: "1px solid #ccc",
-                cursor: "pointer",
-                minWidth: 160,
-                textAlign: "left",
-                fontSize: 18
-              }}
-            >
-              {PERIODS.find(p => p.key === period)?.label}
-            </button>
-            {showDropdown && (
-              <div style={{
-                position: "absolute",
-                top: "110%",
-                left: 0,
-                background: "#fff",
-                border: "1px solid #ccc",
-                borderRadius: 8,
-                boxShadow: "0 2px 8px #0002",
-                zIndex: 10,
-                minWidth: 180
-              }}>
-                {PERIODS.map(p => (
-                  <div
-                    key={p.key}
-                    onClick={() => handlePeriodSelect(p.key)}
-                    style={{
-                      padding: "10px 18px",
-                      cursor: "pointer",
-                      background: p.key === period ? "#e0e7ff" : "transparent"
-                    }}
-                  >
-                    {p.label}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <button
-            onClick={handleGenerate}
-            style={{ padding: "10px 28px", borderRadius: 8, background: "#2563eb", color: "#fff", border: "none", cursor: "pointer", fontSize: 18 }}
-          >
-            Generate
-          </button>
-        </div>
-        {error && (
-          <div style={{ color: "#dc2626", marginBottom: 24, textAlign: "center", fontSize: 18 }}>
-            {error}
-          </div>
-        )}
-        {showCharts && (
-          <>
-            <MetricChart data={temperatureData} dataKey="temperature" color="#38bdae" areaTop="#38bdae" areaBottom="#a8ffeb" title="Temperature (°C)" unit="°C" />
-            <MetricChart data={humidityData} dataKey="humidity" color="#38bdf8" areaTop="#bae6fd" areaBottom="#38bdf8" title="Humidity (%)" unit="%" />
-            <MetricChart data={windData} dataKey="wind" color="#64748b" areaTop="#cbd5e1" areaBottom="#64748b" title="Wind Speed (m/s)" unit="m/s" />
-          </>
-        )}
-      </div>
+      <CurrentWeatherDashboard />
+      <HistoryDashboard
+        city={city}
+        setCity={setCity}
+        period={period}
+        setPeriod={setPeriod}
+        PERIODS={PERIODS}
+        showDropdown={showDropdown}
+        setShowDropdown={setShowDropdown}
+        handleGenerate={handleGenerate}
+        error={error}
+        showCharts={showCharts}
+        temperatureData={temperatureData}
+        humidityData={humidityData}
+        windData={windData}
+        timeToDateMap={timeToDateMap}
+      />
     </div>
   );
 }

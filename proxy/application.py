@@ -1,15 +1,12 @@
-import asyncio
 import grpc
 import weather_pb2
 import weather_pb2_grpc
 
 from core.config import GRPC_API_KEY
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-import logging
-logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
 app.add_middleware(
@@ -19,6 +16,29 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/api/weather")
+async def get_weather(city: str):
+    async with grpc.aio.insecure_channel('weather_backend:50051') as channel:
+        stub = weather_pb2_grpc.WeatherDataStub(channel)
+        request = weather_pb2.CityRequest(city=city)
+
+        try:
+            response = await stub.Weather(
+                request,
+                metadata=[("x-api-key", GRPC_API_KEY)]
+            )
+
+            return {
+                "city_name": response.city_name,
+                "temperature": response.temperature,
+                "weather_description": response.weather_description,
+                "humidity": response.humidity,
+                "wind_speed": response.wind_speed
+            }
+
+        except grpc.aio.AioRpcError as e:
+            return {"error": f"Error: {e.details()}"}
 
 @app.get("/api/history")
 async def get_history(city: str, start_date: str, end_date: str):
@@ -31,8 +51,6 @@ async def get_history(city: str, start_date: str, end_date: str):
         )
 
         try:
-            logging.info(f"Sending WeatherHistory request for city: {city}, start_date: {start_date}, end_date: {end_date}")
-            logging.info(f"Using API Key: {GRPC_API_KEY}")
             response = await stub.WeatherHistory(
                 request,
                 metadata=[("x-api-key", GRPC_API_KEY)]
@@ -51,5 +69,4 @@ async def get_history(city: str, start_date: str, end_date: str):
             }
 
         except grpc.aio.AioRpcError as e:
-            logging.info("gRPC error occurred: %s", e.details())
-            return {"entries": [], "error": f"gRPC error: {e.details()}"}
+            return {"entries": [], "error": f"Error: {e.details()}"}
